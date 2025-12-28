@@ -15,6 +15,11 @@ import ForgotPassword from './pages/ForgotPassword';
 const App: React.FC = () => {
   const navigate = useNavigate();
 
+  // 👉 ADDED: auth state (reads token)
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    !!localStorage.getItem('token')
+  );
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] =
     useState<Specialty | 'All'>('All');
@@ -43,9 +48,16 @@ const App: React.FC = () => {
     alert(`Redirecting to booking system for ${clinic.name}`);
   };
 
+  // 👉 ADDED: logout handler
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
-      {/* HEADER (shared) */}
+      {/* HEADER */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div
@@ -60,27 +72,38 @@ const App: React.FC = () => {
             </span>
           </div>
 
+          {/* 👉 UPDATED: conditional auth buttons */}
           <div className="flex gap-4">
-            <button
-              onClick={() => navigate('/login')}
-              className="text-sm font-semibold text-slate-600 hover:text-blue-600"
-            >
-              Log In
-            </button>
+            {!isLoggedIn ? (
+              <>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="text-sm font-semibold text-slate-600 hover:text-blue-600"
+                >
+                  Log In
+                </button>
 
-            <button
-              onClick={() => navigate('/signup')}
-              className="bg-blue-600 text-white px-4 py-2 rounded-xl"
-            >
-              Sign Up
-            </button>
+                <button
+                  onClick={() => navigate('/signup')}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-xl"
+                >
+                  Sign Up
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 text-white px-4 py-2 rounded-xl"
+              >
+                Logout
+              </button>
+            )}
           </div>
         </div>
       </header>
 
       {/* ROUTES */}
       <Routes>
-        {/* HOME */}
         <Route
           path="/"
           element={

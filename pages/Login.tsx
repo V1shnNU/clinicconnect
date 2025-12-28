@@ -3,9 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // 👈 show/hide
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -29,19 +30,23 @@ const Login: React.FC = () => {
       });
 
       const data = await response.json();
+      console.log("LOGIN RESPONSE:", data);
 
       if (!response.ok) {
-        if (data.message === "Invalid credentials") {
-          setError("❌ User doesn't exist. Please register first.");
-        } else {
-          setError(data.message || "Login failed");
-        }
+        setError(data.message || "Login failed");
+        return;
+      }
+
+      if (!data.token) {
+        setError("Login failed: No token received");
         return;
       }
 
       localStorage.setItem("token", data.token);
-      setMessage("✅ Login successful! Redirecting...");
-      setTimeout(() => navigate("/"), 1500);
+
+      setMessage("Login successful!");
+      window.location.reload(); // 🔑 refresh auth state
+      navigate("/");
     } catch (err) {
       setError("Server error. Please try again.");
     } finally {
@@ -52,21 +57,22 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <h2 className="text-2xl font-extrabold text-center text-slate-800 mb-2">
+        <h2 className="text-2xl font-extrabold text-center text-slate-800 mb-6">
           Log in to <span className="text-blue-600">ClinicConnect</span>
         </h2>
-        <p className="text-center text-slate-500 mb-6">
-          Access your appointments and bookings
-        </p>
 
         {message && (
-          <div className="mb-4 text-green-700 font-semibold text-center">{message}</div>
+          <div className="mb-4 text-green-700 text-center font-semibold">
+            {message}
+          </div>
         )}
         {error && (
-          <div className="mb-4 text-red-600 font-semibold text-center">{error}</div>
+          <div className="mb-4 text-red-600 text-center font-semibold">
+            {error}
+          </div>
         )}
 
-        {/* Email */}
+        {/* EMAIL */}
         <div className="mb-4">
           <label className="block text-sm font-bold mb-1">Email</label>
           <input
@@ -78,7 +84,7 @@ const Login: React.FC = () => {
           />
         </div>
 
-        {/* Password */}
+        {/* PASSWORD */}
         <div className="mb-2">
           <label className="block text-sm font-bold mb-1">Password</label>
           <div className="relative">
@@ -99,6 +105,7 @@ const Login: React.FC = () => {
           </div>
         </div>
 
+        {/* FORGOT PASSWORD */}
         <div className="text-right mb-5">
           <Link
             to="/forgot-password"
@@ -108,6 +115,7 @@ const Login: React.FC = () => {
           </Link>
         </div>
 
+        {/* LOGIN BUTTON */}
         <button
           onClick={handleLogin}
           disabled={loading}
@@ -116,6 +124,7 @@ const Login: React.FC = () => {
           {loading ? "Logging in..." : "Log In"}
         </button>
 
+        {/* SIGNUP LINK */}
         <p className="text-center text-sm text-slate-600 mt-6">
           Don’t have an account?{" "}
           <Link to="/signup" className="text-blue-600 font-bold hover:underline">
