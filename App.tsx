@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 
 import { MOCK_CLINICS } from './constants';
@@ -15,16 +15,15 @@ import ForgotPassword from './pages/ForgotPassword';
 const App: React.FC = () => {
   const navigate = useNavigate();
 
-  // 👉 ADDED: auth state (reads token)
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    !!localStorage.getItem('token')
-  );
+  // ✅ SINGLE SOURCE OF TRUTH
+  const isLoggedIn = Boolean(localStorage.getItem('token'));
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedSpecialty, setSelectedSpecialty] =
-    useState<Specialty | 'All'>('All');
-  const [activeClinic, setActiveClinic] = useState<Clinic | null>(null);
-  const [sortBy, setSortBy] = useState<FilterOptions['sortBy']>('nearest');
+    React.useState<Specialty | 'All'>('All');
+  const [activeClinic, setActiveClinic] = React.useState<Clinic | null>(null);
+  const [sortBy, setSortBy] =
+    React.useState<FilterOptions['sortBy']>('nearest');
 
   const filteredClinics = useMemo(() => {
     let result = MOCK_CLINICS.filter(c => {
@@ -48,11 +47,9 @@ const App: React.FC = () => {
     alert(`Redirecting to booking system for ${clinic.name}`);
   };
 
-  // 👉 ADDED: logout handler
   const handleLogout = () => {
     localStorage.removeItem('token');
-    setIsLoggedIn(false);
-    navigate('/');
+    navigate('/login');
   };
 
   return (
@@ -72,7 +69,6 @@ const App: React.FC = () => {
             </span>
           </div>
 
-          {/* 👉 UPDATED: conditional auth buttons */}
           <div className="flex gap-4">
             {!isLoggedIn ? (
               <>
@@ -132,7 +128,6 @@ const App: React.FC = () => {
           }
         />
 
-        {/* AUTH PAGES */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

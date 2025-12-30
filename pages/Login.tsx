@@ -6,7 +6,7 @@ const Login: React.FC = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // 👈 show/hide
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -30,7 +30,6 @@ const Login: React.FC = () => {
       });
 
       const data = await response.json();
-      console.log("LOGIN RESPONSE:", data);
 
       if (!response.ok) {
         setError(data.message || "Login failed");
@@ -42,10 +41,10 @@ const Login: React.FC = () => {
         return;
       }
 
+      // ✅ Store token
       localStorage.setItem("token", data.token);
 
-      setMessage("Login successful!");
-      window.location.reload(); // 🔑 refresh auth state
+      // ✅ Redirect ONLY (no reload)
       navigate("/");
     } catch (err) {
       setError("Server error. Please try again.");
@@ -61,11 +60,6 @@ const Login: React.FC = () => {
           Log in to <span className="text-blue-600">ClinicConnect</span>
         </h2>
 
-        {message && (
-          <div className="mb-4 text-green-700 text-center font-semibold">
-            {message}
-          </div>
-        )}
         {error && (
           <div className="mb-4 text-red-600 text-center font-semibold">
             {error}
@@ -124,7 +118,7 @@ const Login: React.FC = () => {
           {loading ? "Logging in..." : "Log In"}
         </button>
 
-        {/* SIGNUP LINK */}
+        {/* SIGNUP */}
         <p className="text-center text-sm text-slate-600 mt-6">
           Don’t have an account?{" "}
           <Link to="/signup" className="text-blue-600 font-bold hover:underline">
