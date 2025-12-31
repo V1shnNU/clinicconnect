@@ -1,0 +1,7 @@
+{
+  "name": "Clinic Connect",
+  "description": "A modern healthcare clinic search and appointment booking platform with AI-powered assistance.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
