@@ -3,19 +3,44 @@ import { Link } from "react-router-dom";
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    setMessage("");
+    setError("");
+
     if (!email) {
-      alert("Please enter your email");
+      setError("Please enter your email");
       return;
     }
 
-    // Frontend-only simulation
-    console.log("Reset link sent to:", email);
-    setSent(true);
+    try {
+      setLoading(true);
+
+      const res = await fetch("http://localhost:5000/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }), // ← payload
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Something went wrong");
+      } else {
+        setMessage("Reset link sent successfully. Check your email.");
+      }
+    } catch (err) {
+      setError("Server error. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -29,38 +54,43 @@ const ForgotPassword: React.FC = () => {
           Enter your email and we’ll send you reset instructions
         </p>
 
-        {!sent ? (
-          <form onSubmit={handleSubmit}>
-            <div className="mb-6">
-              <label className="block text-sm font-bold mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="w-full px-4 py-3 border-2 border-black rounded-xl focus:outline-none"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition"
-            >
-              Send Reset Link
-            </button>
-          </form>
-        ) : (
-          <div className="text-center">
-            <p className="text-green-600 font-bold mb-4">
-              Reset link sent successfully!
-            </p>
-            <p className="text-sm text-slate-600">
-              Check your email inbox.
-            </p>
-          </div>
+        {message && (
+          <p className="text-green-600 font-semibold text-center mb-4">
+            {message}
+          </p>
         )}
+
+        {error && (
+          <p className="text-red-600 font-semibold text-center mb-4">
+            {error}
+          </p>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-6">
+            <label className="block text-sm font-bold mb-1">Email</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              className="w-full px-4 py-3 border-2 border-black rounded-xl focus:outline-none"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-3 rounded-xl font-bold transition ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+          >
+            {loading ? "Sending..." : "Send Reset Link"}
+          </button>
+        </form>
 
         <p className="text-center text-sm text-slate-600 mt-6">
           Remembered your password?{" "}
